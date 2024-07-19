@@ -7,10 +7,11 @@ class AddressBookMain:
     def __menu(self) -> None:
         print(f'{"-"*10} Select Option {"-"*10}')
         print('1. Add Contact')
-        print('2. Show All Contacts')
-        print('3. Edit Contact')
-        print('4. Delete Contact')
-        print('5. Exit')
+        print('2. Add Multiple Contacts')
+        print('3. Show All Contacts')
+        print('4. Edit Contact')
+        print('5. Delete Contact')
+        print('6. Exit')
 
     def __run(self) -> None:
         while True:
@@ -19,12 +20,14 @@ class AddressBookMain:
             if option == 1:
                 self.__add_contact()
             elif option == 2:
-                self.__show_all_contacts()
+                self.__add_multiple_contacts()
             elif option == 3:
-                self.__edit_contact()
+                self.__show_all_contacts()
             elif option == 4:
-                self.__delete_contact()
+                self.__edit_contact()
             elif option == 5:
+                self.__delete_contact()
+            elif option == 6:
                 print("Exiting Address Book Program")
                 break
             else:
@@ -39,6 +42,12 @@ class AddressBookMain:
 
     def __add_contact(self) -> None:
         self.address_book.add_contact()
+
+    def __add_multiple_contacts(self) -> None:
+        num_contacts: int = self.__get_valid_int_input("Enter the number of contacts to add: ")
+        for _ in range(num_contacts):
+            print(f"\nAdding contact {_ + 1}:")
+            self.address_book.add_contact()
 
     def __show_all_contacts(self) -> None:
         contacts: list[Contact] = self.address_book.get_all_contacts()
@@ -89,6 +98,11 @@ class AddressBook:
                 return
         self.__contacts.append(contact)
         print("Contact added successfully.")
+
+    def add_multiple_contacts(self, num_contacts: int) -> None:
+        for _ in range(num_contacts):
+            print(f"\nAdding contact {_ + 1}:")
+            self.add_contact()
 
     def get_all_contacts(self):
         return self.__contacts
