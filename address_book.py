@@ -9,7 +9,8 @@ class AddressBookMain:
         print('1. Add Contact')
         print('2. Show All Contacts')
         print('3. Edit Contact')
-        print('4. Exit')
+        print('4. Delete Contact')
+        print('5. Exit')
 
     def __run(self) -> None:
         while True:
@@ -22,6 +23,8 @@ class AddressBookMain:
             elif option == 3:
                 self.__edit_contact()
             elif option == 4:
+                self.__delete_contact()
+            elif option == 5:
                 print("Exiting Address Book Program")
                 break
             else:
@@ -54,6 +57,15 @@ class AddressBookMain:
         else:
             print("Contact not found.")
 
+    def __delete_contact(self) -> None:
+        first_name: str = input("Enter the First Name of the contact to delete: ")
+        last_name: str = input("Enter the Last Name of the contact to delete: ")
+        success: bool = self.address_book.delete_contact(first_name, last_name)
+        if success:
+            print("Contact deleted successfully.")
+        else:
+            print("Contact not found.")
+
 
 class AddressBook:
     def __init__(self):
@@ -76,6 +88,7 @@ class AddressBook:
                     f"Sorry, the contact with first name: {first_name} and last name: {last_name} already exists in AddressBook")
                 return
         self.__contacts.append(contact)
+        print("Contact added successfully.")
 
     def get_all_contacts(self):
         return self.__contacts
@@ -95,6 +108,13 @@ class AddressBook:
 
                 updated_contact = Contact(new_first_name, new_last_name, new_address, new_city, new_state, new_zip_code, new_phone_number, new_email)
                 self.__contacts[i] = updated_contact
+                return True
+        return False
+
+    def delete_contact(self, first_name: str, last_name: str) -> bool:
+        for i, contact in enumerate(self.__contacts):
+            if contact.get_first_name() == first_name and contact.get_last_name() == last_name:
+                del self.__contacts[i]
                 return True
         return False
 
