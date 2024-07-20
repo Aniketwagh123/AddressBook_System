@@ -55,9 +55,11 @@ class AddressBook:
         zip_code: int = int(input("Enter Zip Code: "))
         phone_number: int = int(input("Enter Phone Number: "))
         email: str = input("Enter Email: ")
-        contact: Contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
+        contact: Contact = Contact(
+            first_name, last_name, address, city, state, zip_code, phone_number, email)
         if any(contact == c for c in self.__contacts):
-            print(f"Sorry, the contact with first name: {first_name} and last name: {last_name} already exists.")
+            print(
+                f"Sorry, the contact with first name: {first_name} and last name: {last_name} already exists.")
         else:
             self.__contacts.append(contact)
             print("Contact added successfully.")
@@ -75,7 +77,8 @@ class AddressBook:
                 print(contact)
 
     def edit_contact(self) -> None:
-        first_name: str = input("Enter the First Name of the contact to edit: ")
+        first_name: str = input(
+            "Enter the First Name of the contact to edit: ")
         last_name: str = input("Enter the Last Name of the contact to edit: ")
         success: bool = self.edit_contact_details(first_name, last_name)
         if success:
@@ -87,23 +90,34 @@ class AddressBook:
         for i, contact in enumerate(self.__contacts):
             if contact.get_first_name() == first_name and contact.get_last_name() == last_name:
                 print("Contact found. Enter new details:")
-                new_first_name: str = input("Enter new First Name (leave blank to keep current): ") or contact.get_first_name()
-                new_last_name: str = input("Enter new Last Name (leave blank to keep current): ") or contact.get_last_name()
-                new_address: str = input("Enter new Address (leave blank to keep current): ") or contact.get_address()
-                new_city: str = input("Enter new City (leave blank to keep current): ") or contact.get_city()
-                new_state: str = input("Enter new State (leave blank to keep current): ") or contact.get_state()
-                new_zip_code: int = int(input("Enter new Zip Code (leave blank to keep current): ") or contact.get_zip_code())
-                new_phone_number: int = int(input("Enter new Phone Number (leave blank to keep current): ") or contact.get_phone_number())
-                new_email: str = input("Enter new Email (leave blank to keep current): ") or contact.get_email()
+                new_first_name: str = input(
+                    "Enter new First Name (leave blank to keep current): ") or contact.get_first_name()
+                new_last_name: str = input(
+                    "Enter new Last Name (leave blank to keep current): ") or contact.get_last_name()
+                new_address: str = input(
+                    "Enter new Address (leave blank to keep current): ") or contact.get_address()
+                new_city: str = input(
+                    "Enter new City (leave blank to keep current): ") or contact.get_city()
+                new_state: str = input(
+                    "Enter new State (leave blank to keep current): ") or contact.get_state()
+                new_zip_code: int = int(input(
+                    "Enter new Zip Code (leave blank to keep current): ") or contact.get_zip_code())
+                new_phone_number: int = int(input(
+                    "Enter new Phone Number (leave blank to keep current): ") or contact.get_phone_number())
+                new_email: str = input(
+                    "Enter new Email (leave blank to keep current): ") or contact.get_email()
 
-                updated_contact = Contact(new_first_name, new_last_name, new_address, new_city, new_state, new_zip_code, new_phone_number, new_email)
+                updated_contact = Contact(new_first_name, new_last_name, new_address,
+                                          new_city, new_state, new_zip_code, new_phone_number, new_email)
                 self.__contacts[i] = updated_contact
                 return True
         return False
 
     def delete_contact(self) -> None:
-        first_name: str = input("Enter the First Name of the contact to delete: ")
-        last_name: str = input("Enter the Last Name of the contact to delete: ")
+        first_name: str = input(
+            "Enter the First Name of the contact to delete: ")
+        last_name: str = input(
+            "Enter the Last Name of the contact to delete: ")
         success: bool = self.delete_contact_details(first_name, last_name)
         if success:
             print("Contact deleted successfully.")
@@ -170,7 +184,7 @@ class AddressBookMain:
         if name not in self.__address_books:
             print(f"Address Book '{name}' not found.")
             return
-        
+
         address_book = self.__address_books[name]
         print(f"Selected Address Book: {name}")
         self.__manage_address_book(address_book)
@@ -188,7 +202,8 @@ class AddressBookMain:
             if option == 1:
                 address_book.add_contact()
             elif option == 2:
-                num_contacts: int = self.__get_valid_int_input("Enter the number of contacts to add: ")
+                num_contacts: int = self.__get_valid_int_input(
+                    "Enter the number of contacts to add: ")
                 address_book.add_multiple_contacts(num_contacts)
             elif option == 3:
                 address_book.show_all_contacts()
