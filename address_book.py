@@ -44,6 +44,9 @@ class Contact:
     def get_email(self) -> str:
         return self.__email
 
+    def get_full_name(self) -> str:
+        return f"{self.__first_name} {self.__last_name}"
+
 
 class AddressBook:
     def __init__(self):
@@ -166,6 +169,12 @@ class AddressBook:
     def count_contacts_by_state(self, state: str) -> int:
         return len(self.__contacts_by_state[state])
 
+    def sort_contacts_by_name(self) -> None:
+        sorted_contacts = sorted(
+            self.__contacts, key=lambda contact: contact.get_full_name())
+        for contact in sorted_contacts:
+            print(contact)
+
 
 class AddressBookMain:
     def __init__(self):
@@ -184,7 +193,8 @@ class AddressBookMain:
         print('7. View Contacts by State')
         print('8. Count Contacts by City')
         print('9. Count Contacts by State')
-        print('10. Exit')
+        print('10. Sort Contacts by Name')
+        print('11. Exit')
 
     def __run(self) -> None:
         while True:
@@ -209,24 +219,12 @@ class AddressBookMain:
             elif option == 9:
                 self.__count_contacts_by_state()
             elif option == 10:
+                self.__sort_contacts_by_name()
+            elif option == 11:
                 print("Exiting Address Book Program")
                 break
             else:
                 print("Invalid option, please try again.")
-
-    def __count_contacts_by_city(self) -> None:
-        city: str = input("Enter the city to count contacts: ")
-        total_count = 0
-        for address_book in self.__address_books.values():
-            total_count += address_book.count_contacts_by_city(city)
-        print(f"Total contacts in '{city}': {total_count}")
-
-    def __count_contacts_by_state(self) -> None:
-        state: str = input("Enter the state to count contacts: ")
-        total_count = 0
-        for address_book in self.__address_books.values():
-            total_count += address_book.count_contacts_by_state(state)
-        print(f"Total contacts in '{state}': {total_count}")
 
     def __get_valid_int_input(self, prompt: str) -> int:
         while True:
@@ -341,6 +339,34 @@ class AddressBookMain:
                 print(contact)
         else:
             print(f"No contacts found in '{state}'.")
+
+    def __count_contacts_by_city(self) -> None:
+        city: str = input("Enter the city to count contacts: ")
+        total_contacts: int = 0
+
+        for address_book in self.__address_books.values():
+            total_contacts += address_book.count_contacts_by_city(city)
+
+        print(f"Total contacts in '{city}': {total_contacts}")
+
+    def __count_contacts_by_state(self) -> None:
+        state: str = input("Enter the state to count contacts: ")
+        total_contacts: int = 0
+
+        for address_book in self.__address_books.values():
+            total_contacts += address_book.count_contacts_by_state(state)
+
+        print(f"Total contacts in '{state}': {total_contacts}")
+
+    def __sort_contacts_by_name(self) -> None:
+        address_book_name: str = input(
+            "Enter the name of the Address Book to sort contacts: ")
+        if address_book_name not in self.__address_books:
+            print(f"Address Book '{address_book_name}' not found.")
+            return
+
+        address_book = self.__address_books[address_book_name]
+        address_book.sort_contacts_by_name()
 
 
 if __name__ == "__main__":
