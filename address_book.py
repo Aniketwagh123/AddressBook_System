@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 class Contact:
     def __init__(self, first_name: str, last_name: str, address: str, city: str, state: str, zip_code: int, phone_number: int, email: str):
         self.__first_name: str = first_name
@@ -45,6 +47,8 @@ class Contact:
 class AddressBook:
     def __init__(self):
         self.__contacts: list[Contact] = []
+        self.__contacts_by_city: defaultdict[str, list[Contact]] = defaultdict(list)
+        self.__contacts_by_state: defaultdict[str, list[Contact]] = defaultdict(list)
 
     def add_contact(self) -> None:
         first_name: str = input("Enter First Name: ")
@@ -55,13 +59,13 @@ class AddressBook:
         zip_code: int = int(input("Enter Zip Code: "))
         phone_number: int = int(input("Enter Phone Number: "))
         email: str = input("Enter Email: ")
-        contact: Contact = Contact(
-            first_name, last_name, address, city, state, zip_code, phone_number, email)
+        contact: Contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
         if any(contact == c for c in self.__contacts):
-            print(
-                f"Sorry, the contact with first name: {first_name} and last name: {last_name} already exists.")
+            print(f"Sorry, the contact with first name: {first_name} and last name: {last_name} already exists.")
         else:
             self.__contacts.append(contact)
+            self.__contacts_by_city[city].append(contact)
+            self.__contacts_by_state[state].append(contact)
             print("Contact added successfully.")
 
     def add_multiple_contacts(self, num_contacts: int) -> None:
@@ -77,8 +81,7 @@ class AddressBook:
                 print(contact)
 
     def edit_contact(self) -> None:
-        first_name: str = input(
-            "Enter the First Name of the contact to edit: ")
+        first_name: str = input("Enter the First Name of the contact to edit: ")
         last_name: str = input("Enter the Last Name of the contact to edit: ")
         success: bool = self.edit_contact_details(first_name, last_name)
         if success:
@@ -90,34 +93,32 @@ class AddressBook:
         for i, contact in enumerate(self.__contacts):
             if contact.get_first_name() == first_name and contact.get_last_name() == last_name:
                 print("Contact found. Enter new details:")
-                new_first_name: str = input(
-                    "Enter new First Name (leave blank to keep current): ") or contact.get_first_name()
-                new_last_name: str = input(
-                    "Enter new Last Name (leave blank to keep current): ") or contact.get_last_name()
-                new_address: str = input(
-                    "Enter new Address (leave blank to keep current): ") or contact.get_address()
-                new_city: str = input(
-                    "Enter new City (leave blank to keep current): ") or contact.get_city()
-                new_state: str = input(
-                    "Enter new State (leave blank to keep current): ") or contact.get_state()
-                new_zip_code: int = int(input(
-                    "Enter new Zip Code (leave blank to keep current): ") or contact.get_zip_code())
-                new_phone_number: int = int(input(
-                    "Enter new Phone Number (leave blank to keep current): ") or contact.get_phone_number())
-                new_email: str = input(
-                    "Enter new Email (leave blank to keep current): ") or contact.get_email()
+                old_city, old_state = contact.get_city(), contact.get_state()
 
-                updated_contact = Contact(new_first_name, new_last_name, new_address,
-                                          new_city, new_state, new_zip_code, new_phone_number, new_email)
+                new_first_name: str = input("Enter new First Name (leave blank to keep current): ") or contact.get_first_name()
+                new_last_name: str = input("Enter new Last Name (leave blank to keep current): ") or contact.get_last_name()
+                new_address: str = input("Enter new Address (leave blank to keep current): ") or contact.get_address()
+                new_city: str = input("Enter new City (leave blank to keep current): ") or contact.get_city()
+                new_state: str = input("Enter new State (leave blank to keep current): ") or contact.get_state()
+                new_zip_code: int = int(input("Enter new Zip Code (leave blank to keep current): ") or contact.get_zip_code())
+                new_phone_number: int = int(input("Enter new Phone Number (leave blank to keep current): ") or contact.get_phone_number())
+                new_email: str = input("Enter new Email (leave blank to keep current): ") or contact.get_email()
+
+                updated_contact = Contact(new_first_name, new_last_name, new_address, new_city, new_state, new_zip_code, new_phone_number, new_email)
                 self.__contacts[i] = updated_contact
+
+                # Update dictionaries
+                self.__contacts_by_city[old_city].remove(contact)
+                self.__contacts_by_state[old_state].remove(contact)
+                self.__contacts_by_city[new_city].append(updated_contact)
+                self.__contacts_by_state[new_state].append(updated_contact)
+
                 return True
         return False
 
     def delete_contact(self) -> None:
-        first_name: str = input(
-            "Enter the First Name of the contact to delete: ")
-        last_name: str = input(
-            "Enter the Last Name of the contact to delete: ")
+        first_name: str = input("Enter the First Name of the contact to delete: ")
+        last_name: str = input("Enter the Last Name of the contact to delete: ")
         success: bool = self.delete_contact_details(first_name, last_name)
         if success:
             print("Contact deleted successfully.")
@@ -127,12 +128,20 @@ class AddressBook:
     def delete_contact_details(self, first_name: str, last_name: str) -> bool:
         for i, contact in enumerate(self.__contacts):
             if contact.get_first_name() == first_name and contact.get_last_name() == last_name:
+                self.__contacts_by_city[contact.get_city()].remove(contact)
+                self.__contacts_by_state[contact.get_state()].remove(contact)
                 del self.__contacts[i]
                 return True
         return False
 
     def search_contacts_by_city_or_state(self, search_term: str) -> list[Contact]:
         return [contact for contact in self.__contacts if contact.get_city() == search_term or contact.get_state() == search_term]
+
+    def get_contacts_by_city(self, city: str) -> list[Contact]:
+        return self.__contacts_by_city[city]
+
+    def get_contacts_by_state(self, state: str) -> list[Contact]:
+        return self.__contacts_by_state[state]
 
 
 class AddressBookMain:
@@ -148,7 +157,9 @@ class AddressBookMain:
         print('3. Show All Address Books')
         print('4. Delete Address Book')
         print('5. Search Contacts by City or State')
-        print('6. Exit')
+        print('6. View Contacts by City')
+        print('7. View Contacts by State')
+        print('8. Exit')
 
     def __run(self) -> None:
         while True:
@@ -165,6 +176,10 @@ class AddressBookMain:
             elif option == 5:
                 self.__search_contacts_by_city_or_state()
             elif option == 6:
+                self.__view_contacts_by_city()
+            elif option == 7:
+                self.__view_contacts_by_state()
+            elif option == 8:
                 print("Exiting Address Book Program")
                 break
             else:
@@ -190,7 +205,7 @@ class AddressBookMain:
         if name not in self.__address_books:
             print(f"Address Book '{name}' not found.")
             return
-
+        
         address_book = self.__address_books[name]
         print(f"Selected Address Book: {name}")
         self.__manage_address_book(address_book)
@@ -208,8 +223,7 @@ class AddressBookMain:
             if option == 1:
                 address_book.add_contact()
             elif option == 2:
-                num_contacts: int = self.__get_valid_int_input(
-                    "Enter the number of contacts to add: ")
+                num_contacts: int = self.__get_valid_int_input("Enter the number of contacts to add: ")
                 address_book.add_multiple_contacts(num_contacts)
             elif option == 3:
                 address_book.show_all_contacts()
@@ -240,21 +254,46 @@ class AddressBookMain:
             print(f"Address Book '{name}' not found.")
 
     def __search_contacts_by_city_or_state(self) -> None:
-        search_term: str = input(
-            "Enter the City or State to search for contacts: ")
+        search_term: str = input("Enter the City or State to search for contacts: ")
         found_contacts: list[Contact] = []
-
+        
         for address_book in self.__address_books.values():
-            found_contacts.extend(
-                address_book.search_contacts_by_city_or_state(search_term))
-
+            found_contacts.extend(address_book.search_contacts_by_city_or_state(search_term))
+        
         if found_contacts:
-            print(
-                f"Found {len(found_contacts)} contact(s) in '{search_term}':")
+            print(f"Found {len(found_contacts)} contact(s) in '{search_term}':")
             for contact in found_contacts:
                 print(contact)
         else:
             print(f"No contacts found in '{search_term}'.")
+
+    def __view_contacts_by_city(self) -> None:
+        city: str = input("Enter the city to view contacts: ")
+        found_contacts: list[Contact] = []
+        
+        for address_book in self.__address_books.values():
+            found_contacts.extend(address_book.get_contacts_by_city(city))
+        
+        if found_contacts:
+            print(f"Found {len(found_contacts)} contact(s) in '{city}':")
+            for contact in found_contacts:
+                print(contact)
+        else:
+            print(f"No contacts found in '{city}'.")
+
+    def __view_contacts_by_state(self) -> None:
+        state: str = input("Enter the state to view contacts: ")
+        found_contacts: list[Contact] = []
+        
+        for address_book in self.__address_books.values():
+            found_contacts.extend(address_book.get_contacts_by_state(state))
+        
+        if found_contacts:
+            print(f"Found {len(found_contacts)} contact(s) in '{state}':")
+            for contact in found_contacts:
+                print(contact)
+        else:
+            print(f"No contacts found in '{state}'.")
 
 
 if __name__ == "__main__":
