@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Callable
 
 
 class Contact:
@@ -133,6 +134,21 @@ class AddressBook:
 
                 return True
         return False
+    
+
+    def sort_contacts(self, key_func) -> None:
+        sorted_contacts = sorted(self.__contacts, key=key_func)
+        for contact in sorted_contacts:
+            print(contact)
+
+    def sort_contacts_by_city(self) -> None:
+        self.sort_contacts(lambda contact: contact.get_city())
+
+    def sort_contacts_by_state(self) -> None:
+        self.sort_contacts(lambda contact: contact.get_state())
+
+    def sort_contacts_by_zip(self) -> None:
+        self.sort_contacts(lambda contact: contact.get_zip_code())
 
     def delete_contact(self) -> None:
         first_name: str = input(
@@ -259,13 +275,16 @@ class AddressBookMain:
             print('3. Show All Contacts')
             print('4. Edit Contact')
             print('5. Delete Contact')
-            print('6. Back to Main Menu')
+            print('6. Sort Contacts by Name')
+            print('7. Sort Contacts by City')
+            print('8. Sort Contacts by State')
+            print('9. Sort Contacts by Zip')
+            print('10. Back to Main Menu')
             option: int = self.__get_valid_int_input('Enter your option: ')
             if option == 1:
                 address_book.add_contact()
             elif option == 2:
-                num_contacts: int = self.__get_valid_int_input(
-                    "Enter the number of contacts to add: ")
+                num_contacts: int = self.__get_valid_int_input("Enter the number of contacts to add: ")
                 address_book.add_multiple_contacts(num_contacts)
             elif option == 3:
                 address_book.show_all_contacts()
@@ -274,11 +293,19 @@ class AddressBookMain:
             elif option == 5:
                 address_book.delete_contact()
             elif option == 6:
+                address_book.sort_contacts_by_name()
+            elif option == 7:
+                address_book.sort_contacts_by_city()
+            elif option == 8:
+                address_book.sort_contacts_by_state()
+            elif option == 9:
+                address_book.sort_contacts_by_zip()
+            elif option == 10:
                 print("Returning to Main Menu...")
                 break
             else:
                 print("Invalid option, please try again.")
-
+                
     def __show_all_address_books(self) -> None:
         if not self.__address_books:
             print("No address books found.")
