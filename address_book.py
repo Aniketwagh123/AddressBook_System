@@ -233,7 +233,7 @@ class AddressBookMain:
             if str(address_book) == name:
                 return address_book
         print(f"Address book with name {name} not found.")
-        return None
+        return None # type: ignore
 
     def delete_address_book(self) -> None:
         name: str = input("Enter the name of the address book to delete: ")
