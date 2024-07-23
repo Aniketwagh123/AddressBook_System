@@ -1,5 +1,6 @@
+import csv
 import os
-from typing import List, Dict
+from typing import List
 
 class Contact:
     def __init__(self, first_name: str, last_name: str, address: str, city: str, state: str, zip_code: int, phone_number: int, email: str):
@@ -20,29 +21,29 @@ class Contact:
             return self.__first_name == other.__first_name and self.__last_name == other.__last_name
         return False
 
-    def to_dict(self) -> dict:
-        return {
-            "first_name": self.__first_name,
-            "last_name": self.__last_name,
-            "address": self.__address,
-            "city": self.__city,
-            "state": self.__state,
-            "zip_code": self.__zip_code,
-            "phone_number": self.__phone_number,
-            "email": self.__email
-        }
+    def to_list(self) -> List[str]:
+        return [
+            self.__first_name,
+            self.__last_name,
+            self.__address,
+            self.__city,
+            self.__state,
+            str(self.__zip_code),
+            str(self.__phone_number),
+            self.__email
+        ]
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_list(cls, data: List[str]):
         return cls(
-            data["first_name"],
-            data["last_name"],
-            data["address"],
-            data["city"],
-            data["state"],
-            int(data["zip_code"]),
-            int(data["phone_number"]),
-            data["email"]
+            data[0],
+            data[1],
+            data[2],
+            data[3],
+            data[4],
+            int(data[5]),
+            int(data[6]),
+            data[7]
         )
 
     def get_first_name(self) -> str:
@@ -75,7 +76,7 @@ class Contact:
 class AddressBook:
     def __init__(self, name: str):
         self.__name = name
-        self.__file_path = f'{self.__name}.txt'
+        self.__file_path = f'{self.__name}.csv'
 
     def __str__(self) -> str:
         return self.__name
@@ -96,8 +97,12 @@ class AddressBook:
         if self.is_duplicate_contact(contact):
             print(f"Sorry, the contact with first name: {first_name} and last name: {last_name} already exists.")
         else:
-            with open(self.__file_path, 'a') as file:
-                file.write(f"{contact.to_dict()}\n")
+            file_exists = os.path.isfile(self.__file_path)
+            with open(self.__file_path, 'a', newline='') as file:
+                writer = csv.writer(file)
+                if not file_exists:
+                    writer.writerow(["First Name", "Last Name", "Address", "City", "State", "Zip Code", "Phone Number", "Email"])
+                writer.writerow(contact.to_list())
             print("Contact added successfully.")
 
     def is_duplicate_contact(self, new_contact: Contact) -> bool:
@@ -114,14 +119,16 @@ class AddressBook:
             self.add_contact()
 
     def load_contacts_from_file(self) -> List[Contact]:
-        """Load contacts from a file."""
+        """Load contacts from a CSV file."""
         contacts = []
         if os.path.exists(self.__file_path):
-            with open(self.__file_path, 'r') as file:
-                for line in file:
-                    contact_data = eval(line.strip())
-                    contact = Contact.from_dict(contact_data)
-                    contacts.append(contact)
+            with open(self.__file_path, 'r', newline='') as file:
+                reader = csv.reader(file)
+                next(reader, None)  # Skip the header row
+                for row in reader:
+                    if row:  # Ensure row is not empty
+                        contact = Contact.from_list(row)
+                        contacts.append(contact)
         return contacts
 
     def show_all_contacts(self) -> None:
@@ -162,10 +169,12 @@ class AddressBook:
         print("Contact not found.")
 
     def save_contacts_to_file(self, contacts: List[Contact]) -> None:
-        """Save contacts to a file."""
-        with open(self.__file_path, 'w') as file:
+        """Save contacts to a CSV file."""
+        with open(self.__file_path, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["First Name", "Last Name", "Address", "City", "State", "Zip Code", "Phone Number", "Email"])
             for contact in contacts:
-                file.write(f"{contact.to_dict()}\n")
+                writer.writerow(contact.to_list())
 
     def delete_contact(self) -> None:
         first_name: str = input("Enter the First Name of the contact to delete: ")
@@ -217,14 +226,13 @@ class AddressBook:
         for contact in sorted_contacts:
             print(contact)
 
-
 class AddressBookMain:
     def __init__(self):
         self.__address_books: List[AddressBook] = []
 
     def add_address_book(self) -> None:
         name: str = input("Enter the name of the new address book: ")
-        address_book: AddressBook = AddressBook(name)
+        address_book = AddressBook(name)
         self.__address_books.append(address_book)
         print("Address book created successfully.")
 
@@ -233,14 +241,14 @@ class AddressBookMain:
             if str(address_book) == name:
                 return address_book
         print(f"Address book with name {name} not found.")
-        return None # type: ignore
+        return None
 
     def delete_address_book(self) -> None:
         name: str = input("Enter the name of the address book to delete: ")
         address_book = self.get_address_book(name)
         if address_book:
             self.__address_books.remove(address_book)
-            os.remove(f'{name}.txt')
+            os.remove(f'{name}.csv')
             print("Address book deleted successfully.")
         else:
             print("Address book not found.")
@@ -256,7 +264,7 @@ class AddressBookMain:
     def load_all_address_books(self) -> None:
         """Load all address books from the current directory."""
         for file_name in os.listdir('.'):
-            if file_name.endswith('.txt'):
+            if file_name.endswith('.csv'):
                 name = file_name.split('.')[0]
                 address_book = AddressBook(name)
                 self.__address_books.append(address_book)
@@ -283,8 +291,7 @@ def main():
         elif choice == '3':
             address_book_main.show_all_address_books()
         elif choice == '4':
-            address_book_name = input(
-                "Enter the name of the address book to access: ")
+            address_book_name = input("Enter the name of the address book to access: ")
             address_book = address_book_main.get_address_book(address_book_name)
             if address_book:
                 while True:
@@ -307,8 +314,7 @@ def main():
                     if choice == '1':
                         address_book.add_contact()
                     elif choice == '2':
-                        num_contacts: int = int(
-                            input("Enter the number of contacts to add: "))
+                        num_contacts: int = int(input("Enter the number of contacts to add: "))
                         address_book.add_multiple_contacts(num_contacts)
                     elif choice == '3':
                         address_book.show_all_contacts()
@@ -317,10 +323,8 @@ def main():
                     elif choice == '5':
                         address_book.delete_contact()
                     elif choice == '6':
-                        search_term: str = input(
-                            "Enter city or state to search contacts: ")
-                        results = address_book.search_contacts_by_city_or_state(
-                            search_term)
+                        search_term: str = input("Enter city or state to search contacts: ")
+                        results = address_book.search_contacts_by_city_or_state(search_term)
                         if results:
                             for contact in results:
                                 print(contact)
